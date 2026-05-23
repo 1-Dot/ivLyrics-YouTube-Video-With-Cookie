@@ -12,13 +12,11 @@ This addon uses a non-standard workaround. It is not an official ivLyrics featur
 
 If you see any video background problem while this addon is installed, disable this addon first. Contact ivLyrics developers only if the same issue still reproduces after this addon is disabled.
 
-This addon may stop helping if YouTube changes its embed behavior or account verification rules.
-
 ## Cookie Requirement
 
 This addon does not log in to YouTube for you. It only changes the embed host so YouTube can use normal `youtube.com` cookies.
 
-For this workaround to help, you need to use another method to make YouTube logged in inside Spotify's CEF browser context. Logging in through your normal system browser is not necessarily enough, because Spotify's embedded Chromium environment has its own cookie storage.
+For this workaround to help, you need to use another method to make YouTube logged in inside Spotify's CEF browser context.
 
 ## What it does
 
@@ -30,13 +28,3 @@ For this workaround to help, you need to use another method to make YouTube logg
 ## Marketplace type
 
 This addon is listed as `type: "lyrics"` so it appears under the Lyrics category in the official ivLyrics Marketplace. It does not register a lyrics provider and does not modify ivLyrics upstream files.
-
-## Install
-
-Add the `ivlyrics-addon` GitHub topic to this repository. ivLyrics Marketplace will discover `manifest.json` and install `Addon_YoutubeComVideoBackground.js`.
-
-## Validate
-
-```bash
-npm run validate
-```

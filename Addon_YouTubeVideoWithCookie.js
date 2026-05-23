@@ -1,5 +1,5 @@
 (function ivLyricsYoutubeComVideoBackgroundAddon() {
-  'use strict';
+  "use strict";
 
   /*
    * Unofficial workaround for YouTube video background bot-check prompts.
@@ -8,24 +8,27 @@
    * report upstream when the issue still reproduces without it.
    */
 
-  const ADDON_KEY = '__ivLyricsYoutubeComVideoBackgroundAddon';
+  const ADDON_KEY = "__ivLyricsYouTubeVideoWithCookieAddon";
   const currentScript = document.currentScript;
-  const addonId = currentScript?.dataset?.marketplaceAddon || 'youtube-com-video-background';
+  const addonId =
+    currentScript?.dataset?.marketplaceAddon || "youtube-video-with-cookie";
 
   if (window[ADDON_KEY]?.initialized) {
     return;
   }
 
-  const state = window[ADDON_KEY] || (window[ADDON_KEY] = {
-    initialized: true,
-    iframeObserver: null,
-    scriptObserver: null,
-    ytPatchTimer: null,
-    restores: []
-  });
+  const state =
+    window[ADDON_KEY] ||
+    (window[ADDON_KEY] = {
+      initialized: true,
+      iframeObserver: null,
+      scriptObserver: null,
+      ytPatchTimer: null,
+      restores: [],
+    });
 
   const addRestore = (restore) => {
-    if (typeof restore === 'function') {
+    if (typeof restore === "function") {
       state.restores.push(restore);
     }
   };
@@ -38,48 +41,64 @@
     try {
       const url = new URL(value, window.location.origin);
       if (/youtube-nocookie\.com$/i.test(url.hostname)) {
-        url.hostname = 'www.youtube.com';
+        url.hostname = "www.youtube.com";
       }
       return url.toString();
     } catch {
-      return String(value).replace(/(^https?:\/\/)(?:www\.)?youtube-nocookie\.com/ig, '$1www.youtube.com');
+      return String(value).replace(
+        /(^https?:\/\/)(?:www\.)?youtube-nocookie\.com/gi,
+        "$1www.youtube.com",
+      );
     }
   };
 
   const sanitizeIframe = (iframe) => {
-    if (!iframe || iframe.tagName !== 'IFRAME') {
+    if (!iframe || iframe.tagName !== "IFRAME") {
       return;
     }
 
-    const currentSrc = iframe.getAttribute('src');
+    const currentSrc = iframe.getAttribute("src");
     const nextSrc = normalizeYoutubeUrl(currentSrc);
     if (nextSrc && nextSrc !== currentSrc) {
-      iframe.setAttribute('src', nextSrc);
+      iframe.setAttribute("src", nextSrc);
     }
   };
 
   const patchIframeSrc = () => {
-    if (!window.HTMLIFrameElement || HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped) {
+    if (
+      !window.HTMLIFrameElement ||
+      HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped
+    ) {
       return;
     }
 
-    const descriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+    const descriptor = Object.getOwnPropertyDescriptor(
+      HTMLIFrameElement.prototype,
+      "src",
+    );
     const originalSetAttribute = HTMLIFrameElement.prototype.setAttribute;
 
     if (descriptor?.set) {
-      Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+      Object.defineProperty(HTMLIFrameElement.prototype, "src", {
         configurable: true,
         enumerable: descriptor.enumerable,
         get: descriptor.get,
         set(value) {
           descriptor.set.call(this, normalizeYoutubeUrl(value));
-        }
+        },
       });
     }
 
-    HTMLIFrameElement.prototype.setAttribute = function patchedSetAttribute(name, value) {
-      if (typeof name === 'string' && name.toLowerCase() === 'src') {
-        return originalSetAttribute.call(this, name, normalizeYoutubeUrl(value));
+    HTMLIFrameElement.prototype.setAttribute = function patchedSetAttribute(
+      name,
+      value,
+    ) {
+      if (typeof name === "string" && name.toLowerCase() === "src") {
+        return originalSetAttribute.call(
+          this,
+          name,
+          normalizeYoutubeUrl(value),
+        );
       }
       return originalSetAttribute.apply(this, arguments);
     };
@@ -88,7 +107,7 @@
 
     addRestore(() => {
       if (descriptor) {
-        Object.defineProperty(HTMLIFrameElement.prototype, 'src', descriptor);
+        Object.defineProperty(HTMLIFrameElement.prototype, "src", descriptor);
       }
       HTMLIFrameElement.prototype.setAttribute = originalSetAttribute;
       delete HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped;
@@ -100,11 +119,11 @@
       return;
     }
 
-    document.querySelectorAll('iframe').forEach(sanitizeIframe);
+    document.querySelectorAll("iframe").forEach(sanitizeIframe);
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === 'attributes') {
+        if (mutation.type === "attributes") {
           sanitizeIframe(mutation.target);
           continue;
         }
@@ -113,10 +132,10 @@
           if (node.nodeType !== Node.ELEMENT_NODE) {
             return;
           }
-          if (node.tagName === 'IFRAME') {
+          if (node.tagName === "IFRAME") {
             sanitizeIframe(node);
           }
-          node.querySelectorAll?.('iframe').forEach(sanitizeIframe);
+          node.querySelectorAll?.("iframe").forEach(sanitizeIframe);
         });
       }
     });
@@ -125,7 +144,7 @@
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['src']
+      attributeFilter: ["src"],
     });
 
     state.iframeObserver = observer;
@@ -139,7 +158,11 @@
 
   const patchYouTubePlayer = () => {
     const yt = window.YT;
-    if (!yt || typeof yt.Player !== 'function' || yt.Player.__ivLyricsYoutubeComWrapped) {
+    if (
+      !yt ||
+      typeof yt.Player !== "function" ||
+      yt.Player.__ivLyricsYoutubeComWrapped
+    ) {
       return false;
     }
 
@@ -147,12 +170,13 @@
     const WrappedPlayer = function wrappedYoutubePlayer(element, options = {}) {
       const player = new OriginalPlayer(element, {
         ...options,
-        host: 'https://www.youtube.com'
+        host: "https://www.youtube.com",
       });
 
       setTimeout(() => {
         try {
-          const iframe = typeof player.getIframe === 'function' ? player.getIframe() : null;
+          const iframe =
+            typeof player.getIframe === "function" ? player.getIframe() : null;
           sanitizeIframe(iframe);
         } catch {
           // The player may not expose its iframe until it is ready.
@@ -232,7 +256,7 @@
   window.ivLyricsYoutubeComVideoBackground = {
     addonId,
     normalizeYoutubeUrl,
-    restore
+    restore,
   };
 
   addRestore(() => {
@@ -248,10 +272,12 @@
 
   if (!document.body) {
     const startWhenReady = () => {
-      document.removeEventListener('DOMContentLoaded', startWhenReady);
+      document.removeEventListener("DOMContentLoaded", startWhenReady);
       observeIframes();
     };
-    document.addEventListener('DOMContentLoaded', startWhenReady);
-    addRestore(() => document.removeEventListener('DOMContentLoaded', startWhenReady));
+    document.addEventListener("DOMContentLoaded", startWhenReady);
+    addRestore(() =>
+      document.removeEventListener("DOMContentLoaded", startWhenReady),
+    );
   }
 })();

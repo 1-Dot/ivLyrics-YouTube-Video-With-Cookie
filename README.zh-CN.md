@@ -12,13 +12,11 @@
 
 如果安装本插件后出现任何视频背景相关问题，请先关闭本插件再排查。只有在关闭本插件后问题仍然复现时，才建议联系 ivLyrics 开发者。
 
-如果 YouTube 调整嵌入策略或账号验证规则，本插件可能随时失效。
-
 ## Cookie / 登录要求
 
 本插件不会帮你登录 YouTube。它只负责把嵌入域名改成普通的 `youtube.com`，让 YouTube 有机会读取 `youtube.com` cookie。
 
-这个绕行方案要有效，你还需要通过别的手段让 Spotify 的 CEF 浏览器环境里的 YouTube 处于已登录状态。只在普通系统浏览器里登录 YouTube 不一定有效，因为 Spotify 内嵌 Chromium 环境通常有自己的 cookie 存储。
+这个绕行方案要有效，你还需要通过别的手段让 Spotify 的 CEF 浏览器环境里的 YouTube 处于已登录状态。
 
 ## 功能
 
@@ -30,13 +28,3 @@
 ## 关于插件类型
 
 本插件使用 `type: "lyrics"`，因此会显示在 ivLyrics 官方插件市场的歌词分类下。它不会注册歌词提供器，也不会修改 ivLyrics 上游文件。
-
-## 安装
-
-给该仓库添加 `ivlyrics-addon` GitHub topic。ivLyrics 插件市场会读取 `manifest.json` 并安装 `Addon_YoutubeComVideoBackground.js`。
-
-## 校验
-
-```bash
-npm run validate
-```
