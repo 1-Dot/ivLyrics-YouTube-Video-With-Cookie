@@ -17,8 +17,9 @@ This addon may stop helping if YouTube changes its embed behavior or account ver
 ## What it does
 
 - Rewrites existing YouTube iframe `src` values from `youtube-nocookie.com` to `www.youtube.com`.
-- Patches future iframe `src` assignments.
+- Patches URL hostname assignment so ivLyrics' existing YouTube sanitizer resolves to `www.youtube.com`.
 - Patches `YT.Player` creation to prefer `https://www.youtube.com`.
+- Rewrites only the iframe created by the affected player instance, instead of observing or rewriting every iframe globally.
 - Restores its patches when the Marketplace removes the addon script element.
 
 ## Marketplace type

@@ -18,9 +18,8 @@
 
   const state = window[ADDON_KEY] || (window[ADDON_KEY] = {
     initialized: true,
-    iframeObserver: null,
     scriptObserver: null,
-    ytPatchTimer: null,
+    playerPatchInterval: null,
     restores: []
   });
 
@@ -30,7 +29,15 @@
     }
   };
 
-  const normalizeYoutubeUrl = (value) => {
+  const toYouTubeComValue = (value) => {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    return value.replace(/(^https?:\/\/)(?:www\.)?youtube-nocookie\.com/ig, '$1www.youtube.com')
+      .replace(/^(?:www\.)?youtube-nocookie\.com$/i, 'www.youtube.com');
+  };
+
+  const toYouTubeComUrl = (value) => {
     if (!value || !/youtube-nocookie\.com/i.test(String(value))) {
       return value;
     }
@@ -42,152 +49,110 @@
       }
       return url.toString();
     } catch {
-      return String(value).replace(/(^https?:\/\/)(?:www\.)?youtube-nocookie\.com/ig, '$1www.youtube.com');
+      return toYouTubeComValue(String(value));
     }
   };
 
-  const sanitizeIframe = (iframe) => {
-    if (!iframe || iframe.tagName !== 'IFRAME') {
+  const patchUrlHostnameSetter = () => {
+    if (!window.URL || URL.prototype.__ivLyricsYoutubeComHostnameWrapped) {
       return;
     }
 
-    const currentSrc = iframe.getAttribute('src');
-    const nextSrc = normalizeYoutubeUrl(currentSrc);
-    if (nextSrc && nextSrc !== currentSrc) {
-      iframe.setAttribute('src', nextSrc);
-    }
-  };
-
-  const patchIframeSrc = () => {
-    if (!window.HTMLIFrameElement || HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped) {
+    const descriptor = Object.getOwnPropertyDescriptor(URL.prototype, 'hostname');
+    if (!descriptor?.set) {
       return;
     }
 
-    const descriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
-    const originalSetAttribute = HTMLIFrameElement.prototype.setAttribute;
-
-    if (descriptor?.set) {
-      Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
-        configurable: true,
-        enumerable: descriptor.enumerable,
-        get: descriptor.get,
-        set(value) {
-          descriptor.set.call(this, normalizeYoutubeUrl(value));
-        }
-      });
-    }
-
-    HTMLIFrameElement.prototype.setAttribute = function patchedSetAttribute(name, value) {
-      if (typeof name === 'string' && name.toLowerCase() === 'src') {
-        return originalSetAttribute.call(this, name, normalizeYoutubeUrl(value));
+    Object.defineProperty(URL.prototype, 'hostname', {
+      configurable: true,
+      enumerable: descriptor.enumerable,
+      get: descriptor.get,
+      set(value) {
+        descriptor.set.call(this, toYouTubeComValue(value));
       }
-      return originalSetAttribute.apply(this, arguments);
-    };
+    });
 
-    HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped = true;
-
+    URL.prototype.__ivLyricsYoutubeComHostnameWrapped = true;
     addRestore(() => {
-      if (descriptor) {
-        Object.defineProperty(HTMLIFrameElement.prototype, 'src', descriptor);
-      }
-      HTMLIFrameElement.prototype.setAttribute = originalSetAttribute;
-      delete HTMLIFrameElement.prototype.__ivLyricsYoutubeComWrapped;
+      Object.defineProperty(URL.prototype, 'hostname', descriptor);
+      delete URL.prototype.__ivLyricsYoutubeComHostnameWrapped;
     });
   };
 
-  const observeIframes = () => {
-    if (!document.body || state.iframeObserver) {
-      return;
+  const rewritePlayerIframeOnce = (player) => {
+    try {
+      const iframe = typeof player?.getIframe === 'function' ? player.getIframe() : null;
+      if (!iframe || iframe.tagName !== 'IFRAME') {
+        return;
+      }
+
+      const currentSrc = iframe.getAttribute('src');
+      const nextSrc = toYouTubeComUrl(currentSrc);
+      if (nextSrc && nextSrc !== currentSrc) {
+        iframe.setAttribute('src', nextSrc);
+      }
+    } catch {
+      // Ignore players that are not ready or expose no iframe.
     }
-
-    document.querySelectorAll('iframe').forEach(sanitizeIframe);
-
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes') {
-          sanitizeIframe(mutation.target);
-          continue;
-        }
-
-        mutation.addedNodes?.forEach((node) => {
-          if (node.nodeType !== Node.ELEMENT_NODE) {
-            return;
-          }
-          if (node.tagName === 'IFRAME') {
-            sanitizeIframe(node);
-          }
-          node.querySelectorAll?.('iframe').forEach(sanitizeIframe);
-        });
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['src']
-    });
-
-    state.iframeObserver = observer;
-    addRestore(() => {
-      observer.disconnect();
-      if (state.iframeObserver === observer) {
-        state.iframeObserver = null;
-      }
-    });
   };
 
-  const patchYouTubePlayer = () => {
-    const yt = window.YT;
-    if (!yt || typeof yt.Player !== 'function' || yt.Player.__ivLyricsYoutubeComWrapped) {
+  const patchYouTubePlayerConstructor = () => {
+    if (!window.YT || typeof window.YT.Player !== 'function') {
       return false;
     }
 
-    const OriginalPlayer = yt.Player;
-    const WrappedPlayer = function wrappedYoutubePlayer(element, options = {}) {
-      const player = new OriginalPlayer(element, {
-        ...options,
-        host: 'https://www.youtube.com'
-      });
+    const CurrentPlayer = window.YT.Player;
+    if (CurrentPlayer.__ivLyricsYoutubeComWrapped) {
+      return true;
+    }
 
-      setTimeout(() => {
-        try {
-          const iframe = typeof player.getIframe === 'function' ? player.getIframe() : null;
-          sanitizeIframe(iframe);
-        } catch {
-          // The player may not expose its iframe until it is ready.
-        }
-      }, 0);
+    const WrappedPlayer = function wrappedYoutubePlayer(element, config = {}) {
+      const nextConfig = { ...config };
+      nextConfig.host = 'https://www.youtube.com';
+
+      const player = new CurrentPlayer(element, nextConfig);
+
+      setTimeout(() => rewritePlayerIframeOnce(player), 0);
+      setTimeout(() => rewritePlayerIframeOnce(player), 250);
+      setTimeout(() => rewritePlayerIframeOnce(player), 1000);
 
       return player;
     };
 
-    Object.setPrototypeOf(WrappedPlayer, OriginalPlayer);
-    WrappedPlayer.prototype = OriginalPlayer.prototype;
+    Object.setPrototypeOf(WrappedPlayer, CurrentPlayer);
+    WrappedPlayer.prototype = CurrentPlayer.prototype;
     WrappedPlayer.__ivLyricsYoutubeComWrapped = true;
-    yt.Player = WrappedPlayer;
+    WrappedPlayer.__ivLyricsYoutubeComWrappedTarget = CurrentPlayer;
+    window.YT.Player = WrappedPlayer;
 
     addRestore(() => {
       if (window.YT?.Player === WrappedPlayer) {
-        window.YT.Player = OriginalPlayer;
+        window.YT.Player = CurrentPlayer;
       }
     });
 
     return true;
   };
 
-  const waitForYouTubePlayer = () => {
-    if (patchYouTubePlayer()) {
-      state.ytPatchTimer = null;
+  const keepYouTubePlayerPatched = () => {
+    if (state.playerPatchInterval) {
       return;
     }
-    state.ytPatchTimer = setTimeout(waitForYouTubePlayer, 250);
+
+    patchYouTubePlayerConstructor();
+    state.playerPatchInterval = setInterval(patchYouTubePlayerConstructor, 500);
+    addRestore(() => {
+      if (state.playerPatchInterval) {
+        clearInterval(state.playerPatchInterval);
+        state.playerPatchInterval = null;
+      }
+    });
   };
 
   const restore = () => {
-    if (state.ytPatchTimer) {
-      clearTimeout(state.ytPatchTimer);
-      state.ytPatchTimer = null;
+    if (state.playerPatchInterval) {
+      clearInterval(state.playerPatchInterval);
+      state.playerPatchInterval = null;
     }
 
     [...state.restores].reverse().forEach((restoreCallback) => {
@@ -231,7 +196,7 @@
 
   window.ivLyricsYoutubeComVideoBackground = {
     addonId,
-    normalizeYoutubeUrl,
+    toYouTubeComUrl,
     restore
   };
 
@@ -241,17 +206,7 @@
     }
   });
 
-  patchIframeSrc();
-  observeIframes();
-  waitForYouTubePlayer();
+  patchUrlHostnameSetter();
+  keepYouTubePlayerPatched();
   observeOwnUninstall();
-
-  if (!document.body) {
-    const startWhenReady = () => {
-      document.removeEventListener('DOMContentLoaded', startWhenReady);
-      observeIframes();
-    };
-    document.addEventListener('DOMContentLoaded', startWhenReady);
-    addRestore(() => document.removeEventListener('DOMContentLoaded', startWhenReady));
-  }
 })();
