@@ -17,9 +17,8 @@
 ## 功能
 
 - 将已有 iframe 的 `src` 从 `youtube-nocookie.com` 改为 `www.youtube.com`。
-- 拦截 URL hostname 写入，让 ivLyrics 现有 YouTube sanitizer 解析到 `www.youtube.com`。
+- 拦截后续 iframe `src` 写入。
 - 拦截 `YT.Player` 创建，优先使用 `https://www.youtube.com`。
-- 只对受影响播放器实例创建出的 iframe 做一次性替换，不再全局监听或重写所有 iframe。
 - 当插件市场移除该插件脚本元素时，会还原自身 patch。
 
 ## 关于插件类型

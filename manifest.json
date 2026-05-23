@@ -4,7 +4,7 @@
       "name": "Unofficial YouTube.com Video Background Workaround",
       "type": "ai",
       "author": "1-Dot",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "updated": "2026-05-24",
       "description": {
         "en": "Unofficial, non-standard workaround for the YouTube video background \"Sign in to confirm you're not a bot\" prompt. It rewrites youtube-nocookie.com embeds to youtube.com. This is not an ivLyrics-supported path; disable this addon first when debugging video issues, and contact ivLyrics developers only if the issue still reproduces without it.",

@@ -23,7 +23,7 @@ const code = fs.readFileSync(addonPath, 'utf8');
 for (const needle of [
   'youtube-nocookie\\.com',
   'www.youtube.com',
-  'URL.prototype',
+  'HTMLIFrameElement.prototype',
   'YT.Player',
   'MutationObserver',
   'restore'
