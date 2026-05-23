@@ -1,4 +1,4 @@
-# Unofficial YouTube.com Video Background Workaround for ivLyrics
+# ivLyrics YouTube Video With Cookie
 
 An unofficial ivLyrics Marketplace utility addon that rewrites YouTube video background embeds from `youtube-nocookie.com` to `www.youtube.com`.
 
@@ -14,6 +14,12 @@ If you see any video background problem while this addon is installed, disable t
 
 This addon may stop helping if YouTube changes its embed behavior or account verification rules.
 
+## Cookie Requirement
+
+This addon does not log in to YouTube for you. It only changes the embed host so YouTube can use normal `youtube.com` cookies.
+
+For this workaround to help, you need to use another method to make YouTube logged in inside Spotify's CEF browser context. Logging in through your normal system browser is not necessarily enough, because Spotify's embedded Chromium environment has its own cookie storage.
+
 ## What it does
 
 - Rewrites existing YouTube iframe `src` values from `youtube-nocookie.com` to `www.youtube.com`.
@@ -23,7 +29,7 @@ This addon may stop helping if YouTube changes its embed behavior or account ver
 
 ## Marketplace type
 
-The official ivLyrics Marketplace currently executes JavaScript only for `lyrics` and `ai` addons. This addon is published as `type: "ai"` only to use the official JavaScript loading path. It does not register an AI provider and does not modify ivLyrics upstream files.
+This addon is listed as `type: "lyrics"` so it appears under the Lyrics category in the official ivLyrics Marketplace. It does not register a lyrics provider and does not modify ivLyrics upstream files.
 
 ## Install
 

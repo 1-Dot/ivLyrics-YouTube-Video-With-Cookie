@@ -15,8 +15,8 @@ for (const key of ['name', 'type', 'author', 'version', 'description', 'download
   if (!addon[key]) throw new Error(`manifest addon is missing ${key}.`);
 }
 
-if (addon.type !== 'ai') {
-  throw new Error('manifest addon type must be ai so the official marketplace loads it as executable JavaScript.');
+if (addon.type !== 'lyrics') {
+  throw new Error('manifest addon type must be lyrics so the official marketplace lists it under lyrics.');
 }
 
 const code = fs.readFileSync(addonPath, 'utf8');

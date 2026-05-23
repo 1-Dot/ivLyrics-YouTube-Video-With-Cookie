@@ -1,17 +1,17 @@
 {
   "addons": [
     {
-      "name": "Unofficial YouTube.com Video Background Workaround",
-      "type": "ai",
+      "name": "ivLyrics YouTube Video With Cookie",
+      "type": "lyrics",
       "author": "1-Dot",
       "version": "0.1.2",
       "updated": "2026-05-24",
       "description": {
-        "en": "Unofficial, non-standard workaround for the YouTube video background \"Sign in to confirm you're not a bot\" prompt. It rewrites youtube-nocookie.com embeds to youtube.com. This is not an ivLyrics-supported path; disable this addon first when debugging video issues, and contact ivLyrics developers only if the issue still reproduces without it.",
-        "zh-CN": "非官方、非标准实现的临时绕行方案，用于尝试缓解 YouTube 视频背景出现“请登录，以便我们确认你不是聊天机器人”的问题。它会将 youtube-nocookie.com 嵌入改为 youtube.com。这不是 ivLyrics 官方支持或推荐的实现路径；排查视频相关问题时请先关闭本插件，关闭后仍能复现再联系 ivLyrics 开发者。"
+        "en": "Unofficial, non-standard workaround for the YouTube video background \"Sign in to confirm you're not a bot\" prompt. It rewrites youtube-nocookie.com embeds to youtube.com so YouTube can use cookies inside Spotify's CEF. You must separately make YouTube logged in inside Spotify's CEF for this to help. This is not an ivLyrics-supported path; disable this addon first when debugging video issues, and contact ivLyrics developers only if the issue still reproduces without it.",
+        "zh-CN": "非官方、非标准实现的临时绕行方案，用于尝试缓解 YouTube 视频背景出现“请登录，以便我们确认你不是聊天机器人”的问题。它会将 youtube-nocookie.com 嵌入改为 youtube.com，让 Spotify 的 CEF 中的 YouTube cookie 有机会生效。你必须通过其它手段先让 Spotify 这个 CEF 里的 YouTube 处于已登录状态，本方案才可能有效。这不是 ivLyrics 官方支持或推荐的实现路径；排查视频相关问题时请先关闭本插件，关闭后仍能复现再联系 ivLyrics 开发者。"
       },
-      "githubUrl": "https://github.com/1-Dot/ivLyrics-Youtube-Com-Video-Background",
-      "downloadUrl": "https://raw.githubusercontent.com/1-Dot/ivLyrics-Youtube-Com-Video-Background/main/Addon_YoutubeComVideoBackground.js",
+      "githubUrl": "https://github.com/1-Dot/ivLyrics-YouTube-Video-With-Cookie",
+      "downloadUrl": "https://raw.githubusercontent.com/1-Dot/ivLyrics-YouTube-Video-With-Cookie/main/Addon_YoutubeComVideoBackground.js",
       "minAppVersion": ""
     }
   ]

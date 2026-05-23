@@ -1,8 +1,8 @@
 {
-  "name": "ivlyrics-youtube-com-video-background",
+  "name": "ivlyrics-youtube-video-with-cookie",
   "version": "0.1.2",
   "private": false,
-  "description": "Unofficial ivLyrics Marketplace workaround for YouTube video background bot-check prompts by rewriting youtube-nocookie.com embeds to youtube.com",
+  "description": "Unofficial ivLyrics Marketplace workaround that lets YouTube video background embeds use cookies after YouTube is logged in inside Spotify CEF",
   "scripts": {
     "validate": "node scripts/validate.js"
   },

@@ -1,4 +1,4 @@
-# ivLyrics 非官方 YouTube.com 视频背景绕行插件
+# ivLyrics YouTube Video With Cookie
 
 这是一个 ivLyrics 官方插件市场格式的非官方工具型插件，用于把视频背景里的 YouTube 嵌入地址从 `youtube-nocookie.com` 改为 `www.youtube.com`。
 
@@ -14,6 +14,12 @@
 
 如果 YouTube 调整嵌入策略或账号验证规则，本插件可能随时失效。
 
+## Cookie / 登录要求
+
+本插件不会帮你登录 YouTube。它只负责把嵌入域名改成普通的 `youtube.com`，让 YouTube 有机会读取 `youtube.com` cookie。
+
+这个绕行方案要有效，你还需要通过别的手段让 Spotify 的 CEF 浏览器环境里的 YouTube 处于已登录状态。只在普通系统浏览器里登录 YouTube 不一定有效，因为 Spotify 内嵌 Chromium 环境通常有自己的 cookie 存储。
+
 ## 功能
 
 - 将已有 iframe 的 `src` 从 `youtube-nocookie.com` 改为 `www.youtube.com`。
@@ -23,7 +29,7 @@
 
 ## 关于插件类型
 
-当前 ivLyrics 官方插件市场只有 `lyrics` 和 `ai` 类型会执行 JavaScript。这个插件使用 `type: "ai"` 只是为了走官方 JS 加载路径；它不会注册 AI provider，也不会修改 ivLyrics 上游文件。
+本插件使用 `type: "lyrics"`，因此会显示在 ivLyrics 官方插件市场的歌词分类下。它不会注册歌词提供器，也不会修改 ivLyrics 上游文件。
 
 ## 安装
 
