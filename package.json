@@ -1,0 +1,10 @@
+{
+  "name": "ivlyrics-youtube-com-video-background",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Unofficial ivLyrics Marketplace workaround for YouTube video background bot-check prompts by rewriting youtube-nocookie.com embeds to youtube.com",
+  "scripts": {
+    "validate": "node scripts/validate.js"
+  },
+  "license": "MIT"
+}
