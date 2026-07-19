@@ -1,6 +1,6 @@
 {
   "name": "ivlyrics-youtube-video-with-cookie",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "Unofficial ivLyrics Marketplace workaround that lets YouTube video background embeds use cookies after YouTube is logged in inside Spotify CEF",
   "scripts": {

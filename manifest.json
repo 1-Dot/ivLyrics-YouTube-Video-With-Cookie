@@ -4,7 +4,7 @@
       "name": "ivLyrics YouTube Video With Cookie",
       "type": "lyrics",
       "author": "1-Dot",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "updated": "2026-07-19",
       "description": {
         "en": "Unofficial, non-standard workaround for the YouTube video background \"Sign in to confirm you're not a bot\" prompt. It rewrites youtube-nocookie.com embeds to youtube.com so YouTube can use cookies inside Spotify's CEF. You must separately make YouTube logged in inside Spotify's CEF for this to help. This is not an ivLyrics-supported path; disable this addon first when debugging video issues, and contact ivLyrics developers only if the issue still reproduces without it.",
