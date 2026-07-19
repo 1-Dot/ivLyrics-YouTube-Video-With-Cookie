@@ -21,9 +21,11 @@ For this workaround to help, you need to use another method to make YouTube logg
 ## What it does
 
 - Rewrites existing YouTube iframe `src` values from `youtube-nocookie.com` to `www.youtube.com`.
-- Patches future iframe `src` assignments.
-- Patches `YT.Player` creation to prefer `https://www.youtube.com`.
+- Rewrites again at the final iframe boundary after ivLyrics 6.x `VideoBackgroundDepend` forces the no-cookie host.
+- Tracks runtime `YT.Player` replacements and prefers `https://www.youtube.com`.
 - Restores its patches when the Marketplace removes the addon script element.
+
+After installing or updating, restart Spotify once so the addon can attach before the first player is created.
 
 ## Marketplace type
 
