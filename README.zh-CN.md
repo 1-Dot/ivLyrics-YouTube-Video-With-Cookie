@@ -21,9 +21,11 @@
 ## 功能
 
 - 将已有 iframe 的 `src` 从 `youtube-nocookie.com` 改为 `www.youtube.com`。
-- 拦截后续 iframe `src` 写入。
-- 拦截 `YT.Player` 创建，优先使用 `https://www.youtube.com`。
+- 在 ivLyrics 6.x 的 `VideoBackgroundDepend` 再次强制写回无 Cookie 域名后，于最终 iframe 边界改回普通域名。
+- 持续跟踪最新版运行时替换后的 `YT.Player`，优先使用 `https://www.youtube.com`。
 - 当插件市场移除该插件脚本元素时，会还原自身 patch。
+
+更新或安装后建议完整重启一次 Spotify，让插件从播放器首次创建前就接管地址。
 
 ## 关于插件类型
 
