@@ -45,6 +45,7 @@ class FakeIframe {
   constructor() {
     this.tagName = 'IFRAME';
     this.attributes = new Map();
+    this.srcWriteCount = 0;
   }
 
   getAttribute(name) {
@@ -52,6 +53,7 @@ class FakeIframe {
   }
 
   setAttribute(name, value) {
+    if (name.toLowerCase() === 'src') this.srcWriteCount += 1;
     this.attributes.set(name, String(value));
   }
 }
@@ -117,6 +119,31 @@ const iframe = new FakeIframe();
 iframe.setAttribute('src', inputUrl);
 if (iframe.getAttribute('src') !== expectedUrl) {
   throw new Error('iframe setAttribute bridge did not keep the normal YouTube host.');
+}
+if (iframe.srcWriteCount !== 1) {
+  throw new Error('initial iframe URL should be written exactly once.');
+}
+
+// ivLyrics 6.x observes the youtube.com iframe, derives a no-cookie URL and
+// writes it back. The addon transforms that value to the already-current URL;
+// performing the identical write would reload the iframe and black out the
+// player after a track change.
+iframe.setAttribute('src', inputUrl);
+if (iframe.srcWriteCount !== 1) {
+  throw new Error('redundant ivLyrics iframe rewrite was not suppressed.');
+}
+
+const nextTrackIframe = new FakeIframe();
+nextTrackIframe.setAttribute(
+  'src',
+  'https://www.youtube-nocookie.com/embed/lmnopqrstuv?rel=0'
+);
+if (
+  nextTrackIframe.getAttribute('src') !==
+  'https://www.youtube.com/embed/lmnopqrstuv?rel=0' ||
+  nextTrackIframe.srcWriteCount !== 1
+) {
+  throw new Error('track-change iframe was not initialized exactly once.');
 }
 
 let receivedHost = null;

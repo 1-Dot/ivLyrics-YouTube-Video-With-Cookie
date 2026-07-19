@@ -67,6 +67,7 @@
       owner: null,
       transform: null,
       setRaw(iframe, name, value) {
+        if (iframe.getAttribute?.(name) === String(value)) return undefined;
         return originalSetAttribute.call(iframe, name, value);
       },
     };
@@ -76,12 +77,25 @@
     }
 
     const transform = (value) => {
-      if (!bridge.owner || typeof bridge.transform !== "function") return value;
-      return bridge.transform(value);
+      if (!bridge.owner || typeof bridge.transform !== "function") {
+        return { changed: false, value };
+      }
+      const transformedValue = bridge.transform(value);
+      return {
+        changed: String(transformedValue) !== String(value),
+        value: transformedValue,
+      };
     };
 
     const bridgedSrcSetter = function bridgedYoutubeIframeSrc(value) {
-      return descriptor.set.call(this, transform(value));
+      const transformed = transform(value);
+      if (
+        transformed.changed &&
+        this.getAttribute?.("src") === String(transformed.value)
+      ) {
+        return undefined;
+      }
+      return descriptor.set.call(this, transformed.value);
     };
     Object.defineProperty(HTMLIFrameElement.prototype, "src", {
       configurable: true,
@@ -95,7 +109,17 @@
       value,
     ) {
       if (typeof name === "string" && name.toLowerCase() === "src") {
-        return originalSetAttribute.call(this, name, transform(value));
+        const transformed = transform(value);
+        // VideoBackgroundDepend compares before this addon transforms the URL.
+        // Avoid navigating an already-correct iframe when its no-cookie rewrite
+        // resolves to the exact same youtube.com URL.
+        if (
+          transformed.changed &&
+          this.getAttribute?.(name) === String(transformed.value)
+        ) {
+          return undefined;
+        }
+        return originalSetAttribute.call(this, name, transformed.value);
       }
       return originalSetAttribute.apply(this, arguments);
     };
